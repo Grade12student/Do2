@@ -1,0 +1,65 @@
+[2023-10-22 13:47:25] Random Seed: 3994
+[2023-10-22 13:47:25] Saving zero-level frames...
+[2023-10-22 13:47:25] Extracting frames from bunny.mp4, at size (256, 256)
+[2023-10-22 13:47:25] ==> Commandline Arguments
+[2023-10-22 13:47:25]   Noise_Amps: []
+[2023-10-22 13:47:25]   batch_size: 1
+[2023-10-22 13:47:25]   beta1: 0.5
+[2023-10-22 13:47:25]   checkname: myvideotest
+[2023-10-22 13:47:25]   data_rep: 1000
+[2023-10-22 13:47:25]   device: cpu
+[2023-10-22 13:47:25]   disc_loss_weight: 1.0
+[2023-10-22 13:47:25]   discriminator: WDiscriminator3D
+[2023-10-22 13:47:25]   enc_blocks: 2
+[2023-10-22 13:47:25]   generator: GeneratorHPVAEGAN
+[2023-10-22 13:47:25]   grad_clip: 5
+[2023-10-22 13:47:25]   img_size: 256
+[2023-10-22 13:47:25]   ker_size: 3
+[2023-10-22 13:47:25]   kl_weight: 1.0
+[2023-10-22 13:47:25]   lambda_grad: 0.1
+[2023-10-22 13:47:25]   latent_dim: 128
+[2023-10-22 13:47:25]   lr_d: 0.0005
+[2023-10-22 13:47:25]   lr_g: 0.0005
+[2023-10-22 13:47:25]   lr_scale: 0.2
+[2023-10-22 13:47:25]   manualSeed: 3994
+[2023-10-22 13:47:25]   max_frames: 13
+[2023-10-22 13:47:25]   max_size: 256
+[2023-10-22 13:47:25]   min_size: 32
+[2023-10-22 13:47:25]   mode: train
+[2023-10-22 13:47:25]   nc_im: 3
+[2023-10-22 13:47:25]   netD: 
+[2023-10-22 13:47:25]   netG: 
+[2023-10-22 13:47:25]   nfc: 64
+[2023-10-22 13:47:25]   nfc_prev: 0
+[2023-10-22 13:47:25]   niter: 50000
+[2023-10-22 13:47:25]   noise_amp: 0.1
+[2023-10-22 13:47:25]   noise_amp_init: 0.1
+[2023-10-22 13:47:25]   num_layer: 5
+[2023-10-22 13:47:25]   num_scales: 9
+[2023-10-22 13:47:25]   padd_size: 1
+[2023-10-22 13:47:25]   print_interval: 100
+[2023-10-22 13:47:25]   rec_weight: 10.0
+[2023-10-22 13:47:25]   sampling_rates: [4, 3, 2, 1]
+[2023-10-22 13:47:25]   scale1: 1.0
+[2023-10-22 13:47:25]   scale_factor: 0.7937005259840998
+[2023-10-22 13:47:25]   scale_factor_init: 0.75
+[2023-10-22 13:47:25]   scale_idx: 0
+[2023-10-22 13:47:25]   scaled_size: (256, 256)
+[2023-10-22 13:47:25]   start_frame: 0
+[2023-10-22 13:47:25]   stop_scale: 9
+[2023-10-22 13:47:25]   stop_scale_time: 9
+[2023-10-22 13:47:25]   stride: 1
+[2023-10-22 13:47:25]   train_depth: 1
+[2023-10-22 13:47:25]   vae_levels: 3
+[2023-10-22 13:47:25]   video_path: data/vids/bunny.mp4
+[2023-10-22 13:47:25] ==> Experiment Summary
+[2023-10-22 13:47:25]   Video file : bunny
+[2023-10-22 13:47:25]   Checkname  : myvideotest
+[2023-10-22 13:47:25]   Experiment : experiment_4
+[2023-10-22 13:47:25]   ==> Commandline Summary
+[2023-10-22 13:47:25]     Start frame    : 0
+[2023-10-22 13:47:25]     Max frames     : 13
+[2023-10-22 13:47:25]     Generator      : GeneratorHPVAEGAN
+[2023-10-22 13:47:25]     Iterations     : 50000
+[2023-10-22 13:47:25]     Rec. Weight    : 10.0
+[2023-10-22 13:47:25]     Sampling rates : [4, 3, 2, 1]

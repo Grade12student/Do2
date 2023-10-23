@@ -1,0 +1,55 @@
+Noise_Amps: []
+batch_size: 1
+beta1: 0.5
+checkname: myvideotest
+const_amp: False
+data_rep: 1000
+device: cpu
+disc_loss_weight: 1.0
+discriminator: WDiscriminator3D
+enc_blocks: 2
+generator: GeneratorHPVAEGAN
+grad_clip: 5
+hflip: False
+img_size: 256
+ker_size: 3
+kl_weight: 1.0
+lambda_grad: 0.1
+latent_dim: 128
+lr_d: 0.0005
+lr_g: 0.0005
+lr_scale: 0.2
+manualSeed: 7647
+max_frames: 13
+max_size: 256
+min_size: 32
+mode: train
+nc_im: 3
+netD: 
+netG: 
+nfc: 64
+nfc_prev: 0
+niter: 50000
+no_cuda: False
+noise_amp: 0.1
+noise_amp_init: 0.1
+num_layer: 5
+num_scales: 9
+padd_size: 1
+print_interval: 100
+rec_weight: 10.0
+sampling_rates: [4, 3, 2, 1]
+scale1: 1.0
+scale_factor: 0.7937005259840998
+scale_factor_init: 0.75
+scale_idx: 0
+scaled_size: (256, 256)
+start_frame: 0
+stop_scale: 9
+stop_scale_time: 9
+stride: 1
+train_all: False
+train_depth: 1
+vae_levels: 3
+video_path: data/vids/bunny.mp4
+visualize: True
