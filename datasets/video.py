@@ -2,8 +2,9 @@ import os
 import numpy as np
 import logging
 import torch
+import cv2  # Add this import statement to resolve the NameError
+
 from torch.utils.data import Dataset
-from .generate_frames import video_to_frames  # Make sure to import the video_to_frames function
 
 class SingleVideoDataset(Dataset):
     def __init__(self, frames, transforms=None, subset_pct=0.2, num_sparse_frames=None):
@@ -42,6 +43,14 @@ class SingleVideoDataset(Dataset):
         return input_frames, target_frame
 
 
-# Change the path to a string format enclosed in quotation marks
-frames = video_to_frames("data/vids/bunny.mp4", start_frame=0, max_frames=100)
+# Load frames from the "frames" directory
+frames_directory = "framess"  # Update this with the path to your frames directory
+
+frames = []
+for filename in os.listdir(frames_directory):
+    if filename.endswith('.png') or filename.endswith('.jpg') or filename.endswith('.jpeg'):
+        image_path = os.path.join(frames_directory, filename)
+        frame = cv2.imread(image_path)
+        frames.append(frame)
+
 dataset = SingleVideoDataset(frames)

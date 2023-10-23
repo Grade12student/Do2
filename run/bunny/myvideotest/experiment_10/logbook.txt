@@ -357,3 +357,6 @@
 [2023-10-22 22:37:29] Extracting frames from bunny.mp4
 [2023-10-23 09:15:06] Random Seed: 4142
 [2023-10-23 09:15:06] Extracting frames from bunny.mp4
+[2023-10-23 10:04:06] Random Seed: 907
+[2023-10-23 10:43:02] Random Seed: 5609
+[2023-10-23 11:53:44] Random Seed: 3782

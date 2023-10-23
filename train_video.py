@@ -3,7 +3,7 @@ import utils
 import random
 import os
 import numpy as np
-
+import cv2
 
 
 from utils import logger, tools
@@ -29,6 +29,8 @@ blue = colorama.Fore.CYAN + colorama.Style.BRIGHT
 green = colorama.Fore.GREEN + colorama.Style.BRIGHT
 magenta = colorama.Fore.MAGENTA + colorama.Style.BRIGHT
 
+# Specify the path where you want to create the folder
+output = 'outputs'  # Replace with the desired path
 
 def train(opt, netG):
     # Re-generate dataset frames
@@ -238,7 +240,9 @@ def train(opt, netG):
             else:
                 opt.summary.add_scalar('Video/Scale {}/Rec VAE'.format(opt.scale_idx), rec_vae_loss.item(), iteration)
 '''
-            if iteration % opt.print_interval == 0:
+
+            
+            if opt.visualize and iteration % opt.print_interval == 0:
                 with torch.no_grad():
                     fake_var = []
                     fake_vae_var = []
@@ -255,6 +259,8 @@ def train(opt, netG):
                 opt.summary.visualize_video(opt, iteration, generated_vae, 'Generated VAE')
                 opt.summary.visualize_video(opt, iteration, fake_var, 'Fake var')
                 opt.summary.visualize_video(opt, iteration, fake_vae_var, 'Fake VAE var')
+
+
 
     epoch_iterator.close()
 
@@ -273,192 +279,16 @@ def train(opt, netG):
             'optimizer': optimizerD.state_dict(),
         }, 'netD_{}.pth'.format(opt.scale_idx))
 
-def create_dataset(video_path, transforms=None, subset_pct=0.2, num_sparse_frames=None):
-    frames = video_to_frames(video_path)
+def create_dataset(frames_directory, transforms=None, subset_pct=0.2, num_sparse_frames=None):
+    frames = []
+    for filename in os.listdir(frames_directory):
+        if filename.endswith('.png') or filename.endswith('.jpg') or filename.endswith('.jpeg'):
+            image_path = os.path.join(frames_directory, filename)
+            frame = cv2.imread(image_path)
+            frames.append(frame)
+
     dataset = SingleVideoDataset(frames, transforms=transforms, subset_pct=subset_pct, num_sparse_frames=num_sparse_frames)
     return dataset
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    # load, input, save configurations:
-    parser.add_argument('--netG', default='', help='path to netG (to continue training)')
-    parser.add_argument('--netD', default='', help='path to netD (to continue training)')
-    parser.add_argument('--manualSeed', type=int, help='manual seed')
-
-    # networks hyper parameters:
-    parser.add_argument('--nc-im', type=int, default=3, help='# channels')
-    parser.add_argument('--nfc', type=int, default=64, help='model basic # channels')
-    parser.add_argument('--latent-dim', type=int, default=128, help='Latent dim size')
-    parser.add_argument('--vae-levels', type=int, default=3, help='# VAE levels')
-    parser.add_argument('--enc-blocks', type=int, default=2, help='# encoder blocks')
-    parser.add_argument('--ker-size', type=int, default=3, help='kernel size')
-    parser.add_argument('--num-layer', type=int, default=5, help='number of layers')
-    parser.add_argument('--stride', default=1, help='stride')
-    parser.add_argument('--padd-size', type=int, default=1, help='net pad size')
-    parser.add_argument('--generator', type=str, default='GeneratorHPVAEGAN', help='generator model')
-    parser.add_argument('--discriminator', type=str, default='WDiscriminator3D', help='discriminator model')
-
-    # pyramid parameters:
-    parser.add_argument('--scale-factor', type=float, default=0.75, help='pyramid scale factor')
-    parser.add_argument('--noise_amp', type=float, default=0.1, help='addative noise cont weight')
-    parser.add_argument('--min-size', type=int, default=32, help='image minimal size at the coarser scale')
-    parser.add_argument('--max-size', type=int, default=256, help='image minimal size at the coarser scale')
-
-    # optimization hyper parameters:
-    parser.add_argument('--niter', type=int, default=50000, help='number of iterations to train per scale')
-    parser.add_argument('--lr-g', type=float, default=0.0005, help='learning rate, default=0.0005')
-    parser.add_argument('--lr-d', type=float, default=0.0005, help='learning rate, default=0.0005')
-    parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
-    parser.add_argument('--lambda-grad', type=float, default=0.1, help='gradient penelty weight')
-    parser.add_argument('--rec-weight', type=float, default=10., help='reconstruction loss weight')
-    parser.add_argument('--kl-weight', type=float, default=1., help='reconstruction loss weight')
-    parser.add_argument('--disc-loss-weight', type=float, default=1.0, help='discriminator weight')
-    parser.add_argument('--lr-scale', type=float, default=0.2, help='scaling of learning rate for lower stages')
-    parser.add_argument('--train-depth', type=int, default=1, help='how many layers are trained if growing')
-    parser.add_argument('--grad-clip', type=float, default=5, help='gradient clip')
-    parser.add_argument('--const-amp', action='store_true', default=False, help='constant noise amplitude')
-    parser.add_argument('--train-all', action='store_true', default=False, help='train all levels w.r.t. train-depth')
-
-    # Dataset
-    parser.add_argument('--video-path', required=True, help='video path')
-    parser.add_argument('--start-frame', default=0, type=int, help='start frame number')
-    parser.add_argument('--max-frames', default=13, type=int, help='# frames to save')
-    parser.add_argument('--hflip', action='store_true', default=False, help='horizontal flip')
-    parser.add_argument('--img-size', type=int, default=256)
-    parser.add_argument('--sampling-rates', type=int, nargs='+', default=[4, 3, 2, 1], help='sampling rates')
-    parser.add_argument('--stop-scale-time', type=int, default=-1)
-    parser.add_argument('--data-rep', type=int, default=1000, help='data repetition')
-
-    # Add a default transforms attribute
-    parser.add_argument('--transforms', default=None, help='transforms')
-
-    # Add a default subset_pct attribute
-    parser.add_argument('--subset-pct', type=float, default=0.2, help='subset percentage')
-
-    # Add a default num_sparse_frames attribute
-    parser.add_argument('--num-sparse-frames', type=int, default=None, help='number of sparse frames')
-
-    # main arguments
-    parser.add_argument('--checkname', type=str, default='DEBUG', help='check name')
-    parser.add_argument('--mode', default='train', help='task to be done')
-    parser.add_argument('--batch-size', type=int, default=1, help='batch size')
-    parser.add_argument('--print-interval', type=int, default=100, help='print interva')
-    parser.add_argument('--visualize', action='store_true', default=False, help='visualize using tensorboard')
-    parser.add_argument('--no-cuda', action='store_true', default=False, help='disables cuda')
-
-    parser.set_defaults(hflip=False)
-    opt = parser.parse_args()
-
-    assert opt.vae_levels > 0
-    assert opt.disc_loss_weight > 0
-
-    # Define Saver
-    opt.saver = utils.VideoSaver(opt)
-
-    # Define Tensorboard Summary
-    opt.summary = utils.TensorboardSummary(opt.saver.experiment_dir)
-    logger.configure_logging(os.path.abspath(os.path.join(opt.saver.experiment_dir, 'logbook.txt')))
-
-    # CUDA
-    device = 'cuda' if torch.cuda.is_available() and not opt.no_cuda else 'cpu'
-    opt.device = device
-    if torch.cuda.is_available() and device == 'cpu':
-        logging.info("WARNING: You have a CUDA device, so you should probably run with --cuda")
-
-    # Initial config
-    opt.noise_amp_init = opt.noise_amp
-    opt.scale_factor_init = opt.scale_factor
-
-    # Adjust scales
-    utils.adjust_scales2image(opt.img_size, opt)
-
-    # Manual seed
-    if opt.manualSeed is None:
-        opt.manualSeed = random.randint(1, 10000)
-    logging.info("Random Seed: {}".format(opt.manualSeed))
-    random.seed(opt.manualSeed)
-    torch.manual_seed(opt.manualSeed)
-
-    # Reconstruction loss
-    opt.rec_loss = reconstruction_loss
-    '''# Reconstruction loss
-    opt.rec_loss = torch.nn.MSELoss()'''
-
-    # Initial parameters
-    opt.scale_idx = 0
-    opt.nfc_prev = 0
-    opt.Noise_Amps = []
-    opt.scaled_size = (opt.img_size, opt.img_size)  # Add this line to define the scaled_size attribute
-
-
-    # Create dataset
-    dataset = create_dataset(opt.video_path, transforms=opt.transforms, subset_pct=opt.subset_pct, num_sparse_frames=opt.num_sparse_frames)
-
-
-
-
-    # Set up the dataloader
-    data_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=True)
-
-    # Iterate through the data_loader
-    for data in data_loader:
-        # Perform operations on the data here
-        pass  # Placeholder for your data operations
-
-    if opt.stop_scale_time == -1:
-        opt.stop_scale_time = opt.stop_scale
-
-    opt.dataset = dataset
-    opt.data_loader = data_loader
-
-    with open(os.path.join(opt.saver.experiment_dir, 'args.txt'), 'w') as args_file:
-        for argument, value in sorted(vars(opt).items()):
-            if type(value) in (str, int, float, tuple, list, bool):
-                args_file.write('{}: {}\n'.format(argument, value))
-
-    with logger.LoggingBlock("Commandline Arguments", emph=True):
-        for argument, value in sorted(vars(opt).items()):
-            if type(value) in (str, int, float, tuple, list):
-                logging.info('{}: {}'.format(argument, value))
-
-    with logger.LoggingBlock("Experiment Summary", emph=True):
-        video_file_name, checkname, experiment = opt.saver.experiment_dir.split('/')[-3:]
-        logging.info("{}Video file :{} {}{}".format(magenta, clear, video_file_name, clear))
-        logging.info("{}Checkname  :{} {}{}".format(magenta, clear, checkname, clear))
-        logging.info("{}Experiment :{} {}{}".format(magenta, clear, experiment, clear))
-
-        with logger.LoggingBlock("Commandline Summary", emph=True):
-            logging.info("{}Start frame    :{} {}{}".format(blue, clear, opt.start_frame, clear))
-            logging.info("{}Max frames     :{} {}{}".format(blue, clear, opt.max_frames, clear))
-            logging.info("{}Generator      :{} {}{}".format(blue, clear, opt.generator, clear))
-            logging.info("{}Iterations     :{} {}{}".format(blue, clear, opt.niter, clear))
-            logging.info("{}Rec. Weight    :{} {}{}".format(blue, clear, opt.rec_weight, clear))
-            logging.info("{}Sampling rates :{} {}{}".format(blue, clear, opt.sampling_rates, clear))
-
-    # Current networks
-    assert hasattr(networks_3d, opt.generator)
-    netG = getattr(networks_3d, opt.generator)(opt).to(opt.device)
-
-    if opt.netG != '':
-        if not os.path.isfile(opt.netG):
-            raise RuntimeError("=> no <G> checkpoint found at '{}'".format(opt.netG))
-        checkpoint = torch.load(opt.netG)
-        opt.scale_idx = checkpoint['scale']
-        opt.resumed_idx = checkpoint['scale']
-        opt.resume_dir = '/'.join(opt.netG.split('/')[:-1])
-        for _ in range(opt.scale_idx):
-            netG.init_next_stage()
-        netG.load_state_dict(checkpoint['state_dict'])
-        # NoiseAmp
-        opt.Noise_Amps = torch.load(os.path.join(opt.resume_dir, 'Noise_Amps.pth'))['data']
-    else:
-        opt.resumed_idx = -1
-
-    while opt.scale_idx < opt.stop_scale + 1:
-        if (opt.scale_idx > 0) and (opt.resumed_idx != opt.scale_idx):
-            netG.init_next_stage()
-        train(opt, netG)
-
-        # Increase scale
-        opt.scale_idx += 1
+frames_directory = 'framess'  # Replace with the path to your frames directory
+dataset = create_dataset(frames_directory, transforms=None, subset_pct=0.2, num_sparse_frames=None)
